@@ -2582,7 +2582,21 @@ do
       bar.count = msg:match("(%d+)") or "0"
       bar.dbmType = dbmType
 
-      local barOptions = DBM.ReleaseRevision >= 20220412000000 and DBT.Options or DBM.Bars.options
+      -- DBM-Warmane / WotLK safe options fetch
+      local barOptions
+      do
+        local rev = tonumber(DBM and DBM.ReleaseRevision) or 0
+
+        if DBT and DBT.Options then
+          barOptions = DBT.Options
+        elseif DBM and DBM.Bars and DBM.Bars.options then
+          barOptions = DBM.Bars.options
+        elseif DBM and DBM.Options then
+          barOptions = DBM.Options
+        else
+          barOptions = {}
+        end
+      end
       local r, g, b = 0, 0, 0
       if dbmType == 1 then
         r, g, b = barOptions.StartColorAR, barOptions.StartColorAG, barOptions.StartColorAB

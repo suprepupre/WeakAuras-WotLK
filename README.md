@@ -1,23 +1,95 @@
-# WeakAuras 2 WotLK (3.3.5a)
+# WeakAuras 2 — WotLK (3.3.5a)  
+## DBM Timer Fix for DBM-Warmane (Warmane-compatible)
 
-WeakAuras is a powerful and flexible framework that allows the display of highly customizable graphics on World of Warcraft's user interface to indicate buffs, debuffs, and other relevant information. This addon was created to be a lightweight replacement for Power Auras but has since introduced more functionalities while remaining efficient and easy to use.
+This repository contains a **WotLK 3.3.5a** compatible WeakAuras build and includes a small compatibility fix for **DBM-Warmane** pull timers.
 
-## Features
+---
 
-* An intuitive and powerful configuration interface
-* Custom textures including all textures from Power Auras and Blizzard's spell alerts
-* Progress bars and textures that show the exact duration of auras
-* Displays based on auras, health, power (mana, rage, soul shards, holy power, etc.), cooldowns, combat events, runes, totems, items, and many other triggers
-* Preset and user-defined animations
-* Custom side-effects such as chat announcements or sounds
-* Grouping, which allows multiple displays to be positioned and configured at the same time
-* CPU optimizations such as conditional loading/unloading of displays, modularity, and prevention of full aura scanning
-* Powerful customization options, such as animation paths, on-show/on-hide code, and custom triggers, for Lua-savvy users
+## ✅ What problem does this fix solve?
 
-## Quick Start
+On some WotLK 3.3.5a setups (especially with **DBM-Warmane**), **WeakAuras 4.0.0** may throw a Lua error when using the trigger:
 
-To open the options window, type `/wa` or `/weakauras` into your chat and hit enter or use the minimap icon.
+> **Other Addons → DBM Timer**
 
-## Documentation
+Example error (after `/dbm pull 10`):
 
-For in-depth documentation, see the [wiki](https://github.com/WeakAuras/WeakAuras2/wiki) page.
+
+DBM: Error while executing callback function ... for event DBM_TimerStart:
+WeakAuras\GenericTrigger.lua:... attempt to index field 'Bars' (a nil value)
+
+As a result, any aura relying on DBM Timer triggers may fail to activate.
+
+This fork patches WeakAuras to safely fetch DBM bar options without assuming DBM.Bars exists on DBM-Warmane.
+🔧 What was changed?
+
+File modified:
+
+    WeakAuras/GenericTrigger.lua
+
+Fix summary:
+
+    Adds safe fallbacks for DBM timer bar option access:
+        Prefer DBT.Options when available
+        Otherwise use DBM.Bars.options (if present)
+        Otherwise use DBM.Options or an empty table
+
+This prevents the DBM_TimerStart callback from crashing WeakAuras.
+⭐ WeakAuras Features (short)
+
+WeakAuras is a powerful and flexible framework for creating highly customizable UI displays to track:
+
+    Buffs / debuffs
+    Cooldowns
+    Combat events
+    Items / procs
+    Resources (mana, rage, runes, holy power, etc.)
+    Many other triggers
+
+📦 Installation (WotLK 3.3.5a)
+
+   1. Download or clone this repository.
+
+   2. Copy the WeakAuras folder into:
+    World of Warcraft 3.3.5a/Interface/AddOns/
+
+   3. Restart the game or type:
+    /reload
+
+🚀 Quick Start
+
+Open the WeakAuras options window:
+
+    /wa
+
+    or
+
+    /weakauras
+
+🧪 How to verify the DBM Timer fix
+
+    Install DBM-Warmane (or any DBM build that supports /dbm pull).
+
+    Create or import any aura that uses:
+        Other Addons → DBM Timer
+
+    In-game, run:
+
+    /dbm pull 10
+
+✅ If the fix is working:
+
+    The aura triggers correctly
+    No Lua errors related to DBM_TimerStart / DBM.Bars appear
+
+📝 Notes
+
+    This fix is intended for WotLK 3.3.5a DBM variants where internal structures differ from modern DBM builds.
+    If your DBM build exposes different option fields, additional fallbacks may be required.
+    Please open an issue and include:
+        Your DBM version
+        The full Lua error message
+
+📚 Upstream Documentation
+
+Official WeakAuras wiki:
+https://github.com/WeakAuras/WeakAuras2/wiki
